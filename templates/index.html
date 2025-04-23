@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Assistente de IA</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        textarea { width: 100%; height: 100px; }
+        #pdf-upload { display: none; }
+    </style>
+</head>
+<body>
+    <h1>Sistema Multimodal de IA</h1>
+    
+    <select id="modality">
+        <option value="text">Texto</option>
+        <option value="pdf">PDF</option>
+        <option value="image">Gerar Imagem</option>
+    </select>
+
+    <div id="pdf-upload">
+        <input type="file" accept=".pdf">
+    </div>
+
+    <textarea id="prompt" placeholder="Digite sua solicitação..."></textarea>
+    <button onclick="process()">Enviar</button>
+    
+    <div id="result"></div>
+
+    <script>
+        document.getElementById('modality').addEventListener('change', function() {
+            document.getElementById('pdf-upload').style.display = 
+                this.value === 'pdf' ? 'block' : 'none';
+        });
+
+        async function process() {
+            const modality = document.getElementById('modality').value;
+            const prompt = document.getElementById('prompt').value;
+            const resultDiv = document.getElementById('result');
+            
+            resultDiv.innerHTML = "<p>Processando...</p>";
+            
+            const formData = new FormData();
+            formData.append('modality', modality);
+            formData.append('prompt', prompt);
+            
+            if (modality === 'pdf') {
+                const file = document.querySelector('input[type="file"]').files[0];
+                if (!file) {
+                    alert('Selecione um PDF');
+                    return;
+                }
+                formData.append('file', file);
+            }
+            
+            try {
+                const response = await fetch('/process', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await response.json();
+                
+                if (data.error) {
+                    resultDiv.innerHTML = `<p style="color:red">Erro: ${data.error}</p>`;
+                } else {
+                    resultDiv.innerHTML = `<h3>Resposta:</h3><p>${data.result.replace(/\n/g, '<br>')}</p>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<p style="color:red">Erro: ${error.message}</p>`;
+            }
+        }
+    </script>
+</body>
+</html>
