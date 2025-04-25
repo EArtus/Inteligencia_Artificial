@@ -75,40 +75,91 @@ python -m venv venv
 ## Instale as dependências
 pip install -r requirements.txt
 
-#⚙️ Configuração de Modelos Locais  
-##🧠 Ollama (LLaMA3)  
--Instale e inicie o Ollama  
-ollama pull llama3  
+# ⚙️ Configuração de Modelos Locais
+
+## 🧠 Ollama (LLaMA3)
+
+- Instale e inicie o Ollama:
+
+```bash
+ollama pull llama3
 ollama serve
+```
 
-##🔠 Tesseract OCR  
--Windows:  
-Baixe o instalador em https://github.com/UB-Mannheim/tesseract/wiki  
-Rode tesseract --list-langs no terminal para ver se tem 'por' nas linguagens, caso não tenha:  
-(Opção manual)  
-Baixe o arquivo por.traineddata de: https://github.com/tesseract-ocr/tessdata  
-Cole o arquivo na pasta:C:\Program Files\Tesseract-OCR\tessdata  
+---
 
-(OPção por linha de comando)
-Execute no Powershell(como administrador)
-1.cd "C:\Program Files\Tesseract-OCR"  
-2.if (!(Test-Path "tessdata")) { New-Item -ItemType Directory -Path "tessdata" }  
-3.Invoke-WebRequest -Uri "https://github.com/tesseract-ocr/tessdata/raw/main/por.traineddata" -OutFile "tessdata\por.traineddata"
+## 🔠 Tesseract OCR
 
--Linux:  
+### 🪟 Windows:
+
+1. Baixe o instalador em:  
+   [https://github.com/UB-Mannheim/tesseract/wiki](https://github.com/UB-Mannheim/tesseract/wiki)
+
+2. Verifique as linguagens instaladas:
+
+```bash
+tesseract --list-langs
+```
+
+3. Caso **não tenha `por` (Português)** nas linguagens, siga uma das opções abaixo:
+
+#### 📥 Opção Manual:
+
+- Baixe o arquivo `por.traineddata` de:  
+  [https://github.com/tesseract-ocr/tessdata](https://github.com/tesseract-ocr/tessdata)
+
+- Cole o arquivo no diretório:  
+  `C:\Program Files\Tesseract-OCR\tessdata`
+
+#### 🧑‍💻 Opção por Linha de Comando:
+
+Execute os comandos abaixo no **PowerShell (como administrador)**:
+
+```powershell
+cd "C:\Program Files\Tesseract-OCR"
+if (!(Test-Path "tessdata")) { New-Item -ItemType Directory -Path "tessdata" }
+Invoke-WebRequest -Uri "https://github.com/tesseract-ocr/tessdata/raw/main/por.traineddata" -OutFile "tessdata\por.traineddata"
+```
+
+---
+
+### 🐧 Linux:
+
+```bash
 sudo apt install tesseract-ocr tesseract-ocr-por
+```
 
--macOS:  
+---
+
+### 🍏 macOS:
+
+```bash
 brew install tesseract
+```
 
-##🔍 YOLOv8 e CLIP
--Serão baixados automaticamente na primeira execução.
+---
 
-#▶️ Iniciar a Aplicação  
-- python app.py
+## 🔍 YOLOv8 e CLIP
 
-##🧪 Exemplo de Uso  
-1. Selecione a modalidade desejada (Texto, PDF ou Imagem).  
-2.Faça upload do arquivo (para PDF/Imagem)  
-3.Insira um prompt de comando  
-4.Veja os resultados da análise  
+- Serão baixados **automaticamente** na primeira execução da aplicação.
+
+---
+
+# ▶️ Iniciar a Aplicação
+
+```bash
+python app.py
+```
+
+Acesse: [http://localhost:5000](http://localhost:5000)
+
+---
+
+# 🧪 Exemplo de Uso
+
+1. Selecione a **modalidade desejada** (Texto, PDF ou Imagem)  
+2. Faça **upload do arquivo** (para PDF/Imagem)  
+3. Insira um **prompt de comando**  
+4. Veja os **resultados da análise**
+
+---
