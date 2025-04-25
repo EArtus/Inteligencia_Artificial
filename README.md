@@ -67,10 +67,10 @@ git clone https://github.com/EArtus/Inteligencia_Artificial.git
 ## Acesse a pasta
 cd Inteligencia_Artificial
 
-## Crie e ative o ambiente virtual
-python -m venv venv
-source venv/bin/activate      # Linux/macOS
-venv\Scripts\activate         # Windows
+## Crie e ative o ambiente virtual  
+python -m venv venv  
+# Linux/macOS  source venv/bin/activate      
+# Windows  venv\Scripts\activate  
 
 ## Instale as dependências
 pip install -r requirements.txt
