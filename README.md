@@ -56,7 +56,7 @@ Tesseract OCR instalado
 
 2. Instalação:
 # Clone o repositório
-git clone [seu-repositorio]
+git clone https://github.com/EArtus/Inteligencia_Artificial.git
 
 # Crie e ative o ambiente virtual
 python -m venv venv
