@@ -2,4 +2,7 @@ flask
 ollama
 pypdf2
 torch
-diffusers
+transformers
+ultralytics
+pillow
+pytesseract

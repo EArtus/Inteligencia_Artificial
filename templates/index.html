@@ -3,9 +3,15 @@
 <head>
     <title>Assistente de IA</title>
     <style>
-        body { font-family: Arial, sans-serif; margin: 20px; }
-        textarea { width: 100%; height: 100px; }
-        #pdf-upload { display: none; }
+        body { font-family: Arial, sans-serif; margin: 20px; max-width: 800px; }
+        textarea { width: 100%; height: 100px; margin-bottom: 10px; }
+        #pdf-upload, #image-upload { display: none; margin: 10px 0; }
+        button { padding: 8px 15px; background-color: #4CAF50; color: white; border: none; cursor: pointer; }
+        button:hover { background-color: #45a049; }
+        #result { margin-top: 20px; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .detection { margin: 5px 0; padding: 5px; background-color: #f5f5f5; }
+        .confidence { font-size: 0.9em; color: #666; }
+        .error { color: red; }
     </style>
 </head>
 <body>
@@ -14,22 +20,32 @@
     <select id="modality">
         <option value="text">Texto</option>
         <option value="pdf">PDF</option>
-        <option value="image">Gerar Imagem</option>
+        <option value="image">Analisar Imagem</option>
     </select>
 
     <div id="pdf-upload">
         <input type="file" accept=".pdf">
     </div>
 
-    <textarea id="prompt" placeholder="Digite sua solicitação..."></textarea>
+    <div id="image-upload">
+        <input type="file" accept="image/*">
+    </div>
+
+    <textarea id="prompt" placeholder="Digite sua solicitação (opcional)..."></textarea>
     <button onclick="process()">Enviar</button>
     
     <div id="result"></div>
 
     <script>
         document.getElementById('modality').addEventListener('change', function() {
+            const modality = this.value;
             document.getElementById('pdf-upload').style.display = 
-                this.value === 'pdf' ? 'block' : 'none';
+                modality === 'pdf' ? 'block' : 'none';
+            document.getElementById('image-upload').style.display = 
+                modality === 'image' ? 'block' : 'none';
+            
+            // Limpa o campo de arquivo quando muda a modalidade
+            document.querySelectorAll('input[type="file"]').forEach(input => input.value = '');
         });
 
         async function process() {
@@ -37,16 +53,23 @@
             const prompt = document.getElementById('prompt').value;
             const resultDiv = document.getElementById('result');
             
-            resultDiv.innerHTML = "<p>Processando...</p>";
+            resultDiv.innerHTML = "<p>Processando... Por favor aguarde.</p>";
             
             const formData = new FormData();
             formData.append('modality', modality);
             formData.append('prompt', prompt);
             
+            let fileInput;
             if (modality === 'pdf') {
-                const file = document.querySelector('input[type="file"]').files[0];
+                fileInput = document.querySelector('#pdf-upload input[type="file"]');
+            } else if (modality === 'image') {
+                fileInput = document.querySelector('#image-upload input[type="file"]');
+            }
+            
+            if (fileInput) {
+                const file = fileInput.files[0];
                 if (!file) {
-                    alert('Selecione um PDF');
+                    alert(`Selecione um arquivo ${modality === 'pdf' ? 'PDF' : 'de imagem'}`);
                     return;
                 }
                 formData.append('file', file);
@@ -60,12 +83,48 @@
                 const data = await response.json();
                 
                 if (data.error) {
-                    resultDiv.innerHTML = `<p style="color:red">Erro: ${data.error}</p>`;
+                    resultDiv.innerHTML = `<p class="error">Erro: ${data.error}</p>`;
                 } else {
-                    resultDiv.innerHTML = `<h3>Resposta:</h3><p>${data.result.replace(/\n/g, '<br>')}</p>`;
+                    if (modality === 'image') {
+                        let html = '';
+                        
+                        if (data.type === 'document') {
+                            html += `<h3>Documento/Texto Identificado:</h3>`;
+                            html += `<div style="background:#f9f9f9;padding:10px;margin:10px 0;">`;
+                            html += `<p><strong>Texto extraído:</strong></p>`;
+                            html += `<pre style="white-space: pre-wrap;">${data.text}</pre>`;
+                            html += `</div>`;
+                            html += `<h3>Análise:</h3>`;
+                            html += `<p>${data.description.replace(/\n/g, '<br>')}</p>`;
+                        } else {
+                            html += `<h3>Descrição da Imagem:</h3>`;
+                            html += `<p>${data.description.replace(/\n/g, '<br>')}</p>`;
+                            
+                            if (data.detections && data.detections.length > 0) {
+                                html += `<h3>Objetos Detectados:</h3>`;
+                                data.detections.forEach(det => {
+                                    html += `<div class="detection">`;
+                                    html += `<strong>${det.object}</strong> `;
+                                    html += `<span class="confidence">(${(det.confidence*100).toFixed(1)}% de confiança)</span>`;
+                                    html += `</div>`;
+                                });
+                            }
+                            
+                            if (data.ocr_text && data.ocr_text.trim().length > 10) {
+                                html += `<h3>Texto Identificado na Imagem:</h3>`;
+                                html += `<div style="background:#f9f9f9;padding:10px;margin:10px 0;">`;
+                                html += `<pre style="white-space: pre-wrap;">${data.ocr_text}</pre>`;
+                                html += `</div>`;
+                            }
+                        }
+                        
+                        resultDiv.innerHTML = html;
+                    } else {
+                        resultDiv.innerHTML = `<h3>Resposta:</h3><p>${data.result.replace(/\n/g, '<br>')}</p>`;
+                    }
                 }
             } catch (error) {
-                resultDiv.innerHTML = `<p style="color:red">Erro: ${error.message}</p>`;
+                resultDiv.innerHTML = `<p class="error">Erro: ${error.message}</p>`;
             }
         }
     </script>
