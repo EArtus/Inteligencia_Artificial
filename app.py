@@ -12,16 +12,16 @@ from pytesseract import Output
 
 app = Flask(__name__)
 
-# Configurações
-TEXT_MODEL = "llama3"  # Modelo de texto (usando Ollama local)
-IMAGE_MODEL = "openai/clip-vit-base-patch32"  # Modelo para análise de imagens
-YOLO_MODEL = "yolov8n.pt"  # Modelo para detecção de objetos
-AUDIO_MODEL = "base"  # Modelo Whisper para áudio
 
-# Cache para modelos pesados
+TEXT_MODEL = "llama3" 
+IMAGE_MODEL = "openai/clip-vit-base-patch32"  
+YOLO_MODEL = "yolov8n.pt" 
+AUDIO_MODEL = "base"  
+
+
 model_cache = {}
 
-# Função para carregar modelos sob demanda
+
 def load_model(model_type):
     if model_type not in model_cache:
         if model_type == "image":
@@ -39,25 +39,21 @@ def load_model(model_type):
             }
     return model_cache.get(model_type)
 
-# Melhoria de prompts
 def enhance_prompt(user_prompt, modality):
     enhancements = {
         'text': "[CONTEXTO ACADÊMICO] Responda de forma clara, objetiva e com referências quando possível. Limite a 400 palavras.\nPergunta: ",
         'pdf': "[ANÁLISE DE DOCUMENTO] Resuma o texto abaixo em tópicos principais, destacando conceitos-chave:\n",
         'image': "[ANÁLISE DE IMAGEM] Descreva e analise o conteúdo desta imagem, identificando elementos relevantes:\n",
-        'audio': "[TRANSCRIÇÃO] Converta o áudio para texto, identificando os tópicos principais:\n"
     }
     return enhancements.get(modality, '') + user_prompt
 
-# Função para analisar imagens
 def analyze_image(image_file, prompt=None):
     try:
         image = Image.open(BytesIO(image_file.read()))
         
-        # Primeiro verifica se é um documento/texto usando OCR
         try:
             text = pytesseract.image_to_string(image, lang='por+eng')
-            if len(text.strip()) > 50:  # Se encontrar texto significativo
+            if len(text.strip()) > 50:  
                 return {
                     'is_document': True,
                     'text': text,
@@ -81,7 +77,7 @@ def analyze_image(image_file, prompt=None):
         
         for result in yolo_results:
             for box in result.boxes:
-                if float(box.conf[0]) > 0.25:  # Filtra detecções com baixa confiança
+                if float(box.conf[0]) > 0.25:  
                     detections.append({
                         'object': result.names[int(box.cls[0])],
                         'confidence': float(box.conf[0]),
@@ -92,25 +88,22 @@ def analyze_image(image_file, prompt=None):
             'is_document': False,
             'classification': clip_result,
             'detections': detections,
-            'ocr_text': pytesseract.image_to_string(image, lang='por+eng')[:500]  # Texto OCR limitado
+            'ocr_text': pytesseract.image_to_string(image, lang='por+eng')[:500]  
         }
         
     except Exception as e:
         raise Exception(f"Erro na análise de imagem: {str(e)}")
 
-# Rota principal
 @app.route('/')
 def home():
     return render_template('index.html')
 
-# Processamento multimodal
 @app.route('/process', methods=['POST'])
 def process():
     modality = request.form.get('modality')
     user_prompt = request.form.get('prompt', '')
     
     try:
-        # Processamento de texto
         if modality == 'text':
             response = ollama.generate(
                 model=TEXT_MODEL,
@@ -118,7 +111,6 @@ def process():
             )
             return jsonify({'result': response['response']})
         
-        # Processamento de PDF
         elif modality == 'pdf' and 'file' in request.files:
             pdf_file = request.files['file']
             text = extract_text_from_pdf(pdf_file)
@@ -127,7 +119,6 @@ def process():
                 prompt=enhance_prompt(text, 'pdf'))
             return jsonify({'result': response['response']})
         
-        # Análise de imagens
         elif modality == 'image' and 'file' in request.files:
             image_file = request.files['file']
             
@@ -175,7 +166,6 @@ def process():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-# Helper para extrair texto de PDF
 def extract_text_from_pdf(file):
     try:
         reader = PdfReader(BytesIO(file.read()))
@@ -184,13 +174,11 @@ def extract_text_from_pdf(file):
         raise Exception(f"Erro ao ler PDF: {str(e)}")
 
 if __name__ == '__main__':
-    # Verifica se o modelo Ollama está disponível
     try:
         ollama.list()
     except Exception as e:
         print(f"Erro: Ollama não está rodando. Execute 'ollama serve' em outro terminal. Detalhes: {str(e)}")
     
-    # Configura o Tesseract (ajuste o caminho conforme necessário)
     pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
     
     app.run(debug=True, port=5000)
