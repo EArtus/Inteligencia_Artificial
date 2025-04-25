@@ -69,8 +69,8 @@ cd Inteligencia_Artificial
 
 ## Crie e ative o ambiente virtual  
 python -m venv venv  
-# Linux/macOS  source venv/bin/activate      
-# Windows  venv\Scripts\activate  
+-Linux/macOS  source venv/bin/activate      
+-Windows  venv\Scripts\activate  
 
 ## Instale as dependências
 pip install -r requirements.txt
