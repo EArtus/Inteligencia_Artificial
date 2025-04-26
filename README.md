@@ -1,6 +1,6 @@
 # 📌 Descrição do Projeto
 
-Este projeto é um **assistente de IA multimodal** que processa e analisa diferentes tipos de entrada:
+Este projeto é um **Auxiliar Estudantil** que processa e analisa diferentes tipos de entrada:
 
 - **Texto**: Respostas contextualizadas usando o modelo **LLaMA3**
 - **PDF**: Extração e sumarização de conteúdo

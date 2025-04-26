@@ -1,5 +1,5 @@
 import os
-from flask import Flask, render_template, request, jsonify, send_file
+from flask import Flask, render_template, request, jsonify, send_file 
 from PyPDF2 import PdfReader
 from io import BytesIO
 import ollama
@@ -16,7 +16,6 @@ app = Flask(__name__)
 TEXT_MODEL = "llama3" 
 IMAGE_MODEL = "openai/clip-vit-base-patch32"  
 YOLO_MODEL = "yolov8n.pt" 
-AUDIO_MODEL = "base"  
 
 
 model_cache = {}
@@ -42,39 +41,39 @@ def load_model(model_type):
 def enhance_prompt(user_prompt, modality):
     enhancements = {
         'text': """
-[EXPLICAÇÃO DIDÁTICA] Atue como um professor especialista na área. Siga estas diretrizes:
-1️⃣ **Contextualize**: Introduza o conceito de forma clara antes de detalhá-lo.
-2️⃣ **Desmembre o assunto**: Divida em tópicos lógicos (ex.: definição, aplicações, exemplos).
-3️⃣ **Aprofunde**: Inclua:
+Atue como um professor especialista na área. Siga estas diretrizes:
+ **Contextualize**: Introduza o conceito de forma clara antes de detalhá-lo.
+ **Desmembre o assunto**: Divida em tópicos lógicos (ex.: definição, aplicações, exemplos).
+ **Aprofunde**: Inclua:
    - Fundamentos teóricos (com citações de livros/artigos, se relevante)
    - Casos práticos ou analogias
    - Possíveis equívocos comuns
-4️⃣ **Formato**: Use até 600 palavras, parágrafos curtos e marcadores (🔹) para ênfase.
-5️⃣ **Extra**: Ao final, sugira 1 exercício prático e 2 referências para estudo adicional.
+ **Formato**: Use até 600 palavras, parágrafos curtos e marcadores (🔹) para ênfase.
+ **Extra**: Ao final, sugira 1 exercício prático e 2 referências para estudo adicional.
 
 Pergunta: """,
 
         'pdf': """
 [ANÁLISE ACADÊMICA DE DOCUMENTO] Siga esta estrutura:
-📑 **Resumo Executivo**: 3-4 frases com o núcleo do conteúdo.
-🔎 **Análise Detalhada**:
+ **Resumo Executivo**: 3-4 frases com o núcleo do conteúdo.
+ **Análise Detalhada**:
    - Seção 1: Principais teses/argumentos (ordem de importância)
    - Seção 2: Dados estatísticos ou evidências citadas (com crítica à metodologia, se aplicável)
    - Seção 3: Relação com outras teorias (compare com 1-2 autores clássicos)
-💡 **Aplicações Práticas**: Como esse conteúdo pode ser usado em pesquisas ou projetos reais?
-⚠️ **Limitações**: Pontos fracos ou lacunas no documento analisado.
+ **Aplicações Práticas**: Como esse conteúdo pode ser usado em pesquisas ou projetos reais?
+ **Limitações**: Pontos fracos ou lacunas no documento analisado.
 """,
 
         'image': """
 [DESCRIÇÃO PEDAGÓGICA DE IMAGEM] Siga este roteiro:
-👀 **Análise Visual**:
+ **Análise Visual**:
    - Descreva elementos literais (objetos, cores, disposição)
    - Simbolismo ou metáforas visuais (se houver)
-📚 **Contexto Acadêmico**:
+ **Contexto Acadêmico**:
    - Relacione com teorias/conceitos (ex.: "Esta imagem ilustra o modelo de Bohr porque...")
    - Compare com outras representações iconográficas do tema
-❓ **Perguntas Orientadoras**: Proponha 3 questões para estimular análise crítica (ex.: "Como a escolha cromática reforça a mensagem?")
-✏️ **Atividade**: Sugira uma tarefa baseada na imagem (ex.: "Esboce um diagrama alternativo que...")
+ **Perguntas Orientadoras**: Proponha 3 questões para estimular análise crítica (ex.: "Como a escolha cromática reforça a mensagem?")
+ **Atividade**: Sugira uma tarefa baseada na imagem (ex.: "Esboce um diagrama alternativo que...")
 """
     }
     return enhancements.get(modality, "Modo não reconhecido") + user_prompt
